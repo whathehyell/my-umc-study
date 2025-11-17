@@ -1,4 +1,5 @@
 import { pool } from "../db.config.js";
+import { prisma } from "../db.config.js";
 
 export const checkStoreExists = async (storeId) => {
     const conn = await pool.getConnection();
@@ -58,4 +59,30 @@ export const addUserMissionRepo = async (userId, missionId) => {
     } finally {
         conn.release();
     }
+};
+export const getMissionsByStore = async (storeId) => {
+    const missions = await prisma.mission.findMany({
+        where: { storeId: Number(storeId) },
+        orderBy: { id: "asc" }, 
+    });
+
+    return missions;
+};
+export const getUserOngoingMissions = async (userId) => {
+    return await prisma.userMission.findMany({
+        where: {
+            userId: userId,
+            status: "ONGOING"
+        },
+        include: {
+            mission: {
+                include: {
+                    store: true
+                }
+            }
+        },
+        orderBy: {
+            id: "desc"
+        }
+    });
 };

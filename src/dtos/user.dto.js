@@ -16,17 +16,20 @@ export const bodyToUser = (body) => {
 // 📁 src/dtos/user.dto.js
 
 export const responseFromUser = ({ user, preferences }) => {
+    const preferFoods = preferences.map(
+        (preference) => preference.foodCategory.name
+    );
+    
+    return {email: user.email,
+    name: user.name,
+    preferCategory: preferFoods,
+};
+};
+export const responseFromReviews = (reviews) => {
     return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        gender: user.gender,
-        birth: user.birth,
-        address: user.address || "",
-        detailAddress: user.detailAddress || "",
-        phoneNumber: user.phoneNumber,
-        preferences: preferences.map((pref) => pref.categoryName || pref.name),
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        data: reviews,
+        pagination: {
+            cursor: reviews.length ? reviews[reviews.length - 1].id : null,
+        },
     };
 };

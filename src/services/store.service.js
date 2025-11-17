@@ -9,3 +9,7 @@ export const addReviewService = async (storeId, content, rating) => {
     const reviewId = await addReviewRepo(storeId, content, rating);
     return reviewId;
 };
+export const listStoreReviews = async (storeId) => {
+    const reviews = await getAllStoreReviews(storeId);
+    return responseFromReviews(reviews);
+};

@@ -1,4 +1,6 @@
 import { addMissionRepo, checkStoreExists, checkMissionExists, checkAlreadyChallenged, addUserMissionRepo } from "../repositories/mission.repository.js";
+import { getMissionsByStore } from "../repositories/mission.repository.js";
+import { getUserOngoingMissions } from "../repositories/mission.repository.js";
 
 export const addMissionService = async (storeId, title, description, point, deadline) => {
     const exists = await checkStoreExists(storeId);
@@ -19,3 +21,10 @@ export const challengeMissionService = async (missionId, userId) => {
     return challengeId;
 };
 
+export const getMissionsForStore = async (storeId) => {
+    const missions = await getMissionsByStore(storeId);
+    return missions;
+};
+export const fetchUserOngoingMissions = async (userId) => {
+    return await getUserOngoingMissions(userId);
+};

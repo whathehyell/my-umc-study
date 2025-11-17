@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `user_store_review` ADD COLUMN `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    ADD COLUMN `rating` DOUBLE NULL DEFAULT 0;
