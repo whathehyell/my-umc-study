@@ -1,13 +1,39 @@
 import { addMissionRepo, checkStoreExists, checkMissionExists, checkAlreadyChallenged, addUserMissionRepo } from "../repositories/mission.repository.js";
 import { getMissionsByStore } from "../repositories/mission.repository.js";
 import { getUserOngoingMissions } from "../repositories/mission.repository.js";
+import { NotFoundError, BadRequestError } from "../errors.js";
+import { prisma } from "../db.config.js";
+
+export const fetchStoreMissions = async (storeId) => {
+    storeId = Number(storeId);
+    const store = await prisma.store.findUnique({ where: { id: storeId } });
+    
+    if (!store) throw new NotFoundError("존재하지 않는 가게입니다.", { storeId });
+    
+    const missions = await prisma.mission.findMany({
+        where: { storeId },
+        orderBy: { id: "asc" }
+    });
+    return missions;
+};
+
 
 export const addMissionService = async (storeId, title, description, point, deadline) => {
-    const exists = await checkStoreExists(storeId);
-    if (!exists) throw new Error("존재하지 않는 가게입니다.");
+    storeId = Number(storeId);
     
-    const missionId = await addMissionRepo(storeId, title, description, point, deadline);
-    return missionId;
+    const store = await prisma.store.findUnique({ where: { id: storeId } });
+    if (!store) throw new NotFoundError("존재하지 않는 가게입니다.", { storeId });
+    
+    const newMission = await prisma.mission.create({
+        data: {
+            storeId,
+            title,
+            description,
+            point,
+            deadline: new Date(deadline),
+        },
+    });
+    return newMission.id;
 };
 
 export const challengeMissionService = async (missionId, userId) => {
@@ -26,5 +52,13 @@ export const getMissionsForStore = async (storeId) => {
     return missions;
 };
 export const fetchUserOngoingMissions = async (userId) => {
-    return await getUserOngoingMissions(userId);
+    userId = Number(userId);
+    
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundError("존재하지 않는 사용자입니다.", { userId });
+    
+    return prisma.userMission.findMany({
+        where: { userId, status: "ONGOING" },
+        include: { mission: true },
+    });
 };

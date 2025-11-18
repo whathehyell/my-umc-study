@@ -63,6 +63,8 @@ export const addUserMissionRepo = async (userId, missionId) => {
 export const getMissionsByStore = async (storeId) => {
     const missions = await prisma.mission.findMany({
         where: { storeId: Number(storeId) },
+        include: { store: true },
+
         orderBy: { id: "asc" }, 
     });
 

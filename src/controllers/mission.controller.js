@@ -1,70 +1,67 @@
-import { addMissionService, challengeMissionService } from "../services/mission.service.js";
-import { getMissionsByStore } from "../repositories/mission.repository.js";
-import { getMissionsForStore } from "../services/mission.service.js";
-import { fetchUserOngoingMissions } from "../services/mission.service.js";
+import {
+    addMissionService,
+    challengeMissionService,
+    fetchStoreMissions,
+    fetchUserOngoingMissions,
+} from "../services/mission.service.js";
 
-export const addMissionToStore = async (req, res) => {
+export const addMissionToStore = async (req, res, next) => {
     try {
-        const storeId = parseInt(req.params.storeId, 10);
+        const storeId = Number(req.params.storeId);
         const { title, description, point, deadline } = req.body;
         
         const missionId = await addMissionService(storeId, title, description, point, deadline);
         
-        res.status(201).json({
+        return res.success({
             message: "미션이 등록되었습니다.",
             missionId,
         });
     } catch (err) {
-        console.error(err);
-        res.status(400).json({ message: err.message || "미션 등록 중 오류 발생" });
+        next(err);
     }
 };
 
-export const challengeMission = async (req, res) => {
+export const challengeMission = async (req, res, next) => {
     try {
-        const missionId = parseInt(req.params.missionId, 10);
+        const missionId = Number(req.params.missionId);
         const { userId } = req.body;
         
-        const challengeId = await challengeMissionService(missionId, userId);
+        const result = await challengeMissionService(userId, missionId);
         
-        res.status(201).json({
+        return res.success({
             message: "미션 도전에 성공했습니다.",
-            challengeId,
+            challengeId: result.id,
         });
     } catch (err) {
-        console.error(err);
-        res.status(400).json({
-            message: err.message || "미션 도전 중 오류 발생",
-        });
+        next(err);
     }
 };
-export const handleGetMissionsByStore = async (req, res) => {
+
+export const handleGetMissionsByStore = async (req, res, next) => {
     try {
-        const storeId = parseInt(req.params.storeId);
-        const missions = await getMissionsByStore(storeId);
+        const storeId = Number(req.params.storeId);
+        const missions = await fetchStoreMissions(storeId);
         
-        res.status(200).json({
+        return res.success({
             storeId,
             missions,
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "미션 조회 중 오류가 발생했습니다." });
+    } catch (err) {
+        next(err);
     }
 };
-export const handleGetUserOngoingMissions = async (req, res) => {
-    const userId = parseInt(req.params.userId, 10);
 
+export const handleGetUserOngoingMissions = async (req, res, next) => {
     try {
+        const userId = Number(req.params.userId);
         const missions = await fetchUserOngoingMissions(userId);
-
-        return res.status(200).json({
+        
+        return res.success({
             userId,
-            ongoingMissions: missions
+            ongoingMissions: missions,
         });
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Server Error" });
+        next(err);
     }
 };
 
